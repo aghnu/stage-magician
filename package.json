@@ -22,14 +22,16 @@
     "event-loop"
   ],
   "type": "module",
-  "main": "./dist/stage-magician.umd.cjs",
-  "module": "./dist/stage-magician.js",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/stage-magician.js",
       "require": "./dist/stage-magician.umd.cjs"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils.js",
+      "require": "./dist/utils.umd.cjs"
     }
   },
   "files": [

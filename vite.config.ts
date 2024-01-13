@@ -10,7 +10,7 @@ export default defineConfig({
     lib: {
       entry: {
         "stage-magician": resolve(__dirname, "src/index.ts"),
-        "stage-magician/utils": resolve(__dirname, "src/utils/index.ts"),
+        utils: resolve(__dirname, "src/utils/index.ts"),
       },
     },
   },
