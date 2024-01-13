@@ -75,6 +75,7 @@ export function usePointerState() {
     window.addEventListener("touchstart", handlePointerDown);
 
     window.addEventListener("mouseout", handlePointerUp);
+    window.addEventListener("blur", handlePointerUp);
     window.addEventListener("mouseup", handlePointerUp);
     window.addEventListener("touchend", handlePointerUp);
     window.addEventListener("touchcancel", handlePointerUp);
@@ -85,6 +86,7 @@ export function usePointerState() {
     window.removeEventListener("touchstart", handlePointerDown);
 
     window.removeEventListener("mouseout", handlePointerUp);
+    window.removeEventListener("blur", handlePointerUp);
     window.removeEventListener("mouseup", handlePointerUp);
     window.removeEventListener("touchend", handlePointerUp);
     window.removeEventListener("touchcancel", handlePointerUp);
