@@ -20,6 +20,7 @@ export default defineConfig({
         "./vite.config.ts",
         "./.eslintrc.cjs",
         "./jest.config.cjs",
+        "./src/main.ts",
         "**/*.test.ts",
       ],
     }),
