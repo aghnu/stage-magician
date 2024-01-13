@@ -1,6 +1,6 @@
 type BindingFunc<T> = (val: T) => void;
 
-class Bindable<T> {
+export class Bindable<T> {
   private val: T;
   private bindingFuncs: Array<BindingFunc<T>>;
 
@@ -13,6 +13,7 @@ class Bindable<T> {
     if (!this.bindingFuncs.includes(bindingFunc))
       this.bindingFuncs.push(bindingFunc);
 
+    bindingFunc(this.val);
     return () => {
       this.unbind(bindingFunc);
     };
@@ -41,5 +42,3 @@ class Bindable<T> {
     });
   }
 }
-
-export default Bindable;

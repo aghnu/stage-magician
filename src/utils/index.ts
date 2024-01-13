@@ -1,1 +1,1 @@
-export { default as Bindable } from "./Bindable.ts";
+export { Bindable } from "./Bindable.ts";

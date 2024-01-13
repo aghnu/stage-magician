@@ -1,4 +1,4 @@
-import Bindable from "@/utils/Bindable.ts";
+import { Bindable } from "@/utils/Bindable.ts";
 import { useAnimationLoop } from "./useAnimation.ts";
 
 type HtmlElementPropertyReduceFunc<T> = (element: HTMLElement) => T;
