@@ -1,4 +1,4 @@
-type BindingFunc<T> = (val: T) => void;
+type BindingFunc<T> = (val: T, oldVal: T | undefined) => void;
 
 export class Bindable<T> {
   private val: T;
@@ -13,7 +13,7 @@ export class Bindable<T> {
     if (!this.bindingFuncs.includes(bindingFunc))
       this.bindingFuncs.push(bindingFunc);
 
-    bindingFunc(this.val);
+    bindingFunc(this.val, undefined);
     return () => {
       this.unbind(bindingFunc);
     };
@@ -34,10 +34,12 @@ export class Bindable<T> {
     if (this.val === val || JSON.stringify(val) === JSON.stringify(this.val))
       return;
 
+    const oldVal = this.val;
     this.val = val;
+
     this.bindingFuncs.forEach((func) => {
       void new Promise(() => {
-        func(this.val);
+        func(val, oldVal);
       });
     });
   }
