@@ -8,9 +8,10 @@ export default defineConfig({
   build: {
     emptyOutDir: true,
     lib: {
-      entry: resolve(__dirname, "src/index.ts"),
-      name: "stage-magician",
-      fileName: "stage-magician",
+      entry: {
+        "stage-magician": resolve(__dirname, "src/index.ts"),
+        "stage-magician/utils": resolve(__dirname, "src/utils/index.ts"),
+      },
     },
   },
   plugins: [
