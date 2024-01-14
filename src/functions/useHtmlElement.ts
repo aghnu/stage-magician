@@ -8,16 +8,13 @@ export function useHtmlElementProperty<T>(
   reduceFunc: HtmlElementPropertyReduceFunc<T>,
 ) {
   const propertyVal = new Bindable<T | null>(null);
-
-  const { start, stop } = useAnimationLoop(() => {
+  const { cleanup } = useAnimationLoop(() => {
     const el = element.get();
     if (el !== null && el !== undefined) propertyVal.set(reduceFunc(el));
   });
 
   return {
     propertyVal,
-
-    stop,
-    start,
+    cleanup,
   };
 }

@@ -1,25 +1,34 @@
 import { Bindable } from "@/utils/Bindable.ts";
 import { useAnimationLoop } from "./useAnimation.ts";
-
+import { useCleanup } from "./useCleanup.ts";
 interface Position {
   x: number;
   y: number;
 }
 
 export function usePointerPosition() {
-  const pointerPositionX = new Bindable(0);
-  const pointerPositionY = new Bindable(0);
-  const pointerPosition = new Bindable<Position>({ x: 0, y: 0 });
+  const pointerPositionX = new Bindable<number | null>(null);
+  const pointerPositionY = new Bindable<number | null>(null);
+  const pointerPosition = new Bindable<Position | null>(null);
 
-  const {
-    start: startpPointerPositionUpdate,
-    stop: stopPointerPositionUpdate,
-  } = useAnimationLoop(() => {
-    pointerPosition.set({
-      x: pointerPositionX.get(),
-      y: pointerPositionY.get(),
-    });
+  const { cleanup: cleanupAnimationLoop } = useAnimationLoop(() => {
+    const x = pointerPositionX.get();
+    const y = pointerPositionY.get();
+
+    pointerPosition.set(
+      x !== null && y !== null
+        ? {
+            x,
+            y,
+          }
+        : null,
+    );
   });
+
+  function resetPosition() {
+    pointerPositionX.set(null);
+    pointerPositionX.set(null);
+  }
 
   function handleMousePositionUpdate(e: MouseEvent) {
     pointerPositionX.set(e.clientX);
@@ -31,31 +40,29 @@ export function usePointerPosition() {
     pointerPositionY.set(e.touches[0].clientY);
   }
 
-  function start() {
-    startpPointerPositionUpdate();
-    window.addEventListener("mousedown", handleMousePositionUpdate);
-    window.addEventListener("touchmove", handleTouchPositionUpdate);
+  const cleanup = useCleanup(() => {
+    window.addEventListener("touchcancel", resetPosition);
+    window.addEventListener("touchend", resetPosition);
 
     window.addEventListener("mousemove", handleMousePositionUpdate);
     window.addEventListener("touchmove", handleTouchPositionUpdate);
-  }
 
-  function stop() {
-    stopPointerPositionUpdate();
-    window.removeEventListener("mousedown", handleMousePositionUpdate);
-    window.removeEventListener("touchmove", handleTouchPositionUpdate);
+    return () => {
+      cleanupAnimationLoop();
+      window.removeEventListener("touchcancel", resetPosition);
+      window.removeEventListener("touchend", resetPosition);
 
-    window.removeEventListener("mousemove", handleMousePositionUpdate);
-    window.removeEventListener("touchmove", handleTouchPositionUpdate);
-  }
+      window.removeEventListener("mousemove", handleMousePositionUpdate);
+      window.removeEventListener("touchmove", handleTouchPositionUpdate);
+    };
+  });
 
   return {
     pointerPositionX,
     pointerPositionY,
     pointerPosition,
 
-    start,
-    stop,
+    cleanup,
   };
 }
 
@@ -70,58 +77,53 @@ export function usePointerState() {
     pointerDown.set(true);
   }
 
-  function start() {
+  const cleanup = useCleanup(() => {
     window.addEventListener("mousedown", handlePointerDown);
     window.addEventListener("touchstart", handlePointerDown);
 
-    window.addEventListener("mouseout", handlePointerUp);
     window.addEventListener("blur", handlePointerUp);
     window.addEventListener("mouseup", handlePointerUp);
     window.addEventListener("touchend", handlePointerUp);
     window.addEventListener("touchcancel", handlePointerUp);
-  }
 
-  function stop() {
-    window.removeEventListener("mousedown", handlePointerDown);
-    window.removeEventListener("touchstart", handlePointerDown);
+    return () => {
+      window.removeEventListener("mousedown", handlePointerDown);
+      window.removeEventListener("touchstart", handlePointerDown);
 
-    window.removeEventListener("mouseout", handlePointerUp);
-    window.removeEventListener("blur", handlePointerUp);
-    window.removeEventListener("mouseup", handlePointerUp);
-    window.removeEventListener("touchend", handlePointerUp);
-    window.removeEventListener("touchcancel", handlePointerUp);
-  }
+      window.removeEventListener("blur", handlePointerUp);
+      window.removeEventListener("mouseup", handlePointerUp);
+      window.removeEventListener("touchend", handlePointerUp);
+      window.removeEventListener("touchcancel", handlePointerUp);
+    };
+  });
 
   return {
     pointerDown,
 
-    start,
-    stop,
+    cleanup,
   };
 }
 
 export function usePointerDragVector() {
-  const {
-    pointerPosition,
-    start: startPointerPosition,
-    stop: stopPointerPosition,
-  } = usePointerPosition();
+  const { pointerPosition, cleanup: cleanupPointerPosition } =
+    usePointerPosition();
 
-  const {
-    pointerDown,
-    start: startPointerState,
-    stop: stopPointerState,
-  } = usePointerState();
+  const { pointerDown, cleanup: cleanupPointerState } = usePointerState();
 
   const pointerDragVectorX = new Bindable(0);
   const pointerDragVectorY = new Bindable(0);
   const pointerDragVector = new Bindable<Position>({ x: 0, y: 0 });
 
   function handleSetVector(
-    positionNew: Position,
-    positionOld: Position | undefined,
+    positionNew: Position | null,
+    positionOld: Position | null | undefined,
   ) {
-    if (!pointerDown.get() || positionOld === undefined) {
+    if (
+      !pointerDown.get() ||
+      positionOld === null ||
+      positionNew === null ||
+      positionOld === undefined
+    ) {
       pointerDragVectorX.set(0);
       pointerDragVectorY.set(0);
     } else {
@@ -134,24 +136,21 @@ export function usePointerDragVector() {
     });
   }
 
-  function start() {
-    startPointerPosition();
-    startPointerState();
+  const cleanup = useCleanup(() => {
     pointerPosition.bind(handleSetVector);
-  }
 
-  function stop() {
-    stopPointerPosition();
-    stopPointerState();
-    pointerPosition.unbind(handleSetVector);
-  }
+    return () => {
+      cleanupPointerPosition();
+      cleanupPointerState();
+      pointerPosition.unbind(handleSetVector);
+    };
+  });
 
   return {
     pointerDragVectorX,
     pointerDragVectorY,
     pointerDragVector,
 
-    start,
-    stop,
+    cleanup,
   };
 }

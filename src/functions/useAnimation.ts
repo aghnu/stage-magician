@@ -1,3 +1,5 @@
+import { useCleanup } from "./useCleanup.ts";
+
 type AnimationFrameFunc = (context: {
   timeStamp: number;
   timeElapsed: number;
@@ -17,19 +19,16 @@ export function useAnimationLoop(animationFrameFunc: AnimationFrameFunc) {
     });
   }
 
-  function start() {
-    if (currentAnimationFrameId !== undefined) return;
+  const cleanup = useCleanup(() => {
     loop();
-  }
-
-  function stop() {
-    if (currentAnimationFrameId === undefined) return;
-    window.cancelAnimationFrame(currentAnimationFrameId);
-    currentAnimationFrameId = undefined;
-  }
+    return () => {
+      if (currentAnimationFrameId === undefined) return;
+      window.cancelAnimationFrame(currentAnimationFrameId);
+      currentAnimationFrameId = undefined;
+    };
+  });
 
   return {
-    start,
-    stop,
+    cleanup,
   };
 }
