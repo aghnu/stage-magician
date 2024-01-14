@@ -1,15 +1,12 @@
 import { Bindable } from "@/utils/Bindable.ts";
 import { useAnimationLoop } from "./useAnimation.ts";
 import { useCleanup } from "./useCleanup.ts";
-interface Position {
-  x: number;
-  y: number;
-}
+import { type Vector } from "@/type/html.ts";
 
 export function usePointerPosition() {
   const pointerPositionX = new Bindable<number | null>(null);
   const pointerPositionY = new Bindable<number | null>(null);
-  const pointerPosition = new Bindable<Position | null>(null);
+  const pointerPosition = new Bindable<Vector | null>(null);
 
   const { cleanup: cleanupAnimationLoop } = useAnimationLoop(() => {
     const x = pointerPositionX.get();
@@ -112,11 +109,11 @@ export function usePointerDragVector() {
 
   const pointerDragVectorX = new Bindable(0);
   const pointerDragVectorY = new Bindable(0);
-  const pointerDragVector = new Bindable<Position>({ x: 0, y: 0 });
+  const pointerDragVector = new Bindable<Vector>({ x: 0, y: 0 });
 
   function handleSetVector(
-    positionNew: Position | null,
-    positionOld: Position | null | undefined,
+    positionNew: Vector | null,
+    positionOld: Vector | null | undefined,
   ) {
     if (
       !pointerDown.get() ||
